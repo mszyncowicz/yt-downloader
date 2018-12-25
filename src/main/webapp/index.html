@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en" ng-app="app">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .topbar{
+             display:block;
+              width:100%;
+              height:200px;
+       }
+
+       .download-info{
+       
+        position: relative;
+        margin: 2% auto;
+         width: 60%;
+       }
+       li.ng-animate {
+         z-index: -1;
+        }
+       li.ng-animate,
+       li.ng-animate ~ li {
+        transition: transform 0.6s;
+        }
+       .download-info.ng-enter{
+        transition:0.8s linear all;
+         left:-100px;
+         opacity: 0;
+       }
+
+       .download-info.ng-enter.ng-enter-active{
+        left: 0px;
+        opacity: 1;
+       }
+
+       .download-info.ng-leave{
+        transition:0.8s linear all;
+        opacity: 1;
+         left:0px;
+       }
+       .download-info.ng-leave.ng-leave-active{
+        opacity: 0;
+
+         left:100px;
+       }
+    </style>
+    <title>YT-Downloader</title>
+
+  </head>
+  <script src="node_modules/angular/angular.min.js"></script>
+  <script src="node_modules/angular-animate/angular-animate.min.js"></script>
+  <script src="controller.js"></script>
+
+  <body>
+        <div class="jumbotron bg-dark text-white" ng-controller="sessionCtrl">
+                <div class="topbar">
+                        <div class="row justify-content-center">
+                     
+                                <h1 class="display-4">YT-Downloader</h1>
+                                
+                              </div>
+                              <div class="mt-2 col-md-12" style="margin-bottom:70px">
+                            </div>
+                              <div class="row justify-content-center">
+                          
+                                    <div class="radio" style="padding:5px">
+                                            <label><input type="radio" name="optradio" ng-model="type" ng-checked="true" value="audio" >Best Audio</label>
+                                          </div>
+                                          <div class="radio" style="padding:5px">
+                                            <label><input  type="radio" ng-model="type" name="optradio" value="video">Best Video</label>
+                                          </div>
+                                        
+                                      </div>
+     
+                </div>
+                <div class="content" ng-controller="sessionCtrl">
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="input-group input-group-lg col-md-6">
+        
+                                    <div class="input-group-prepend">
+                                      <span class="input-group-text" id="inputGroup-sizing-lg">Link</span>
+                                    </div>
+                                    <input ng-model = "link" type="text" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm">
+                                    <div class="input-group-append">
+                                            <button class="btn btn-primary" ng-disabled = "enableDownload" ng-click="downloadClick()" id="downloadButton"><i id = "loadingIcon"class="fa fa-spinner fa-spin"></i> Download</button>
+                                          </div>
+                                </div>
+                            <div class="col-md-3"></div>
+                            </div>
+
+                            
+                          
+                        </div>
+                        <div class="row">
+                          <div class="col-md-3"></div>
+                          <div class="col-md-6" style="margin-top:10px;opacity:0;" id ="errorBand">
+      
+                            <div class="alert alert-danger" id ="errorMessage">
+                              <strong>Danger!</strong> Indicates a dangerous or potentially negative action.
+                            </div>
+                              </div>
+                          <div class="col-md-3"></div>
+                       
+                          </div>
+
+                          
+                        
+                      </div>
+                     
+                </div>
+                <div class="jumbotron bg-white text-dark" ng-controller ="sessionCtrl">
+                    <ul>
+                    <div class = "border border-primary download-info" data-ng-repeat="download in downloads">
+                        <h2>{{download.title}}</h2>
+                        <div>{{download.state}}</div>
+                        <div class="progress-bar" role="progressbar" style="width: {{download.percentage}}%;" aria-valuenow={{download.percentage}} aria-valuemin="0" aria-valuemax="100">{{download.percentage}}%</div>
+
+                    </div>
+                  </ul>
+                </div>
+      
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/popper.js/dist/popper.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js" ></script>
+
+    <script>
+    /*
+      $( document ).ready(function() {
+        
+        var $injector = angular.element(document).injector();
+        console.log($injector.has('sessionFactory') + "");
+        var SessionFactory = $injector.get('sessionFactory');
+         console.log( "ready!" );
+        var id = setInterval(function(){
+          var token = SessionFactory.get();
+          if (token != null){
+            clearInterval(id);
+            startFunction(token);
+        }
+    },1000);
+      });
+*/
+      
+      
+    </script>
+  </body>
+</html>
