@@ -10,7 +10,10 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.util.StatusPrinter;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +28,12 @@ import java.util.Properties;
 
 
 @Slf4j
-//@Startup
+@Startup
+@Singleton
 public class Main {
+
+    @Inject
+    Logger logger;
 
     static void lookForApp(String app){
         /*
@@ -56,9 +63,9 @@ public class Main {
         }
     }
 
-   // @PostConstruct
-    public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
-        lookForApp("youtube-dl -U");
+    //@PostConstruct
+    public void lookup() throws ClassNotFoundException, IOException, SQLException {
+        update();
         lookForApp("ffmpeg");
         Class.forName("org.h2.Driver");
         Properties prop = new Properties();
@@ -69,5 +76,10 @@ public class Main {
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
         StatusPrinter.print(lc);
         log.info("Successfully initialized file database");
+    }
+
+    @Schedule(hour = "*/1",persistent = false)
+    public void update(){
+        lookForApp("youtube-dl -U");
     }
 }
