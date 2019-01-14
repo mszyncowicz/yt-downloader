@@ -62,7 +62,6 @@ public class SessionServiceImpl implements SessionService{
         session.setToken(Session.generateRandom(TOKEN_SIZE));
 
         return sessionRepository.save(session);
-
     }
 
     @Override

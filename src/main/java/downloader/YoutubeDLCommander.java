@@ -10,7 +10,7 @@ import java.util.Map;
 public class YoutubeDLCommander implements Commander {
     private static final String SKIP_DOWNLOAD = "--skip-download ";
     private static final String LIST_FORMATS = "--list-formats ";
-    private static final String BEST_VIDEO = "-f bestvideo --recode-video mp4 ";
+    private static final String BEST_VIDEO = "--recode-video mp4 --postprocessor-args \"-c:v libx264\" ";
     private static final String BEST_AUDIO = "--extract-audio --audio-format mp3 --audio-quality 0 ";
 
     private boolean skipDownload = false;

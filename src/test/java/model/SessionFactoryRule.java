@@ -14,6 +14,7 @@ public class SessionFactoryRule implements MethodRule {
     private SessionFactory sessionFactory;
     private Transaction transaction;
     private org.hibernate.Session session;
+
     @Override
     public Statement apply(final Statement statement, FrameworkMethod method,
                            Object test) {
