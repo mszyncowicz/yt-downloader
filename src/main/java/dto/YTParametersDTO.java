@@ -18,6 +18,6 @@ public class YTParametersDTO {
     @JsonProperty(value="isTimed", required = true)
     private boolean isTimed;
 
-    @JsonProperty(value="overwrite")
+    @JsonProperty(value="overwrite", required = true)
     private boolean overwrite;
 }

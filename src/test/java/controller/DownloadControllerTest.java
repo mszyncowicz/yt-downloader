@@ -91,6 +91,8 @@ public class DownloadControllerTest {
         YTParametersDTO ytParametersDTO = new YTParametersDTO();
         ytParametersDTO.setMediaType("audio");
         ytParametersDTO.setUrl("www.rosyjskatuletka.pl");
+        ytParametersDTO.setTimed(false);
+        ytParametersDTO.setOverwrite(true);
         try {
             downloadController.initializeDownload(Session.generateRandom(Session.scale), ytParametersDTO);
         } catch (AbstractMethodError error) {
@@ -105,7 +107,7 @@ public class DownloadControllerTest {
         }
         Assert.assertTrue(savedRecord);
 
-        verify(downloadBeanMock, times(1)).prepareDownload(anyObject(),eq(Collections.emptyList()));
+        verify(downloadBeanMock, times(1)).prepareDownload(anyObject(),eq(ytParametersDTO.isOverwrite()),eq(Collections.emptyList()));
 
     }
 
@@ -124,7 +126,7 @@ public class DownloadControllerTest {
         Session session = new Session();
         record.setSession(session);
         session.setToken(token);
-        Download download = new Download(record);
+        Download download = new Download(record,true);
         LogObserver observer = mock(LogObserver.class);
         String last_message = "Last Message";
         when(observer.getLastMessage()).thenReturn(last_message);

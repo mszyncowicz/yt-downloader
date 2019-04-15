@@ -69,7 +69,7 @@ public class DownloadBeanTest {
         downloadBean.setDownloadList(downloads);
 
         TestObserver mock = mock(TestObserver.class);
-        Download download = downloadBean.prepareDownload(new Record(), Arrays.asList(mock));
+        Download download = downloadBean.prepareDownload(new Record(), true, Arrays.asList(mock));
 
         Assert.assertTrue(downloads.contains(download));
         Assert.assertTrue(download.getObservers().contains(mock));
@@ -97,7 +97,7 @@ public class DownloadBeanTest {
         List<Download> downloads = new ArrayList<>();
         Record record = new Record();
         record.setState(State.finalizing);
-        Download downloadToRemove = new Download( record);
+        Download downloadToRemove = new Download( record, true);
         downloads.add(downloadToRemove);
         downloadBean.setDownloadList(downloads);
         downloadBean.removeFinished(downloadToRemove);
@@ -123,7 +123,7 @@ public class DownloadBeanTest {
 
         Record record = new Record();
         record.setId(UUID.randomUUID());
-        Download download = new Download( record);
+        Download download = new Download( record, true);
         List<Download> downloads = new ArrayList<>();
         downloads.add(download);
 
@@ -152,7 +152,7 @@ public class DownloadBeanTest {
 
         downloadBean.scanForNotDownloaded();
 
-        verify(downloadBean,times(0)).prepareDownload(anyObject(),anyObject());
+        verify(downloadBean,times(0)).prepareDownload(anyObject(),anyBoolean(),anyObject());
         verify(downloadBean,times(recordService.getNotDownloaded().size())).removeUnfinished(anyObject());
 
         verify(executorBeanInterface,times(0)).start(any());
@@ -185,7 +185,7 @@ public class DownloadBeanTest {
     }
 
     private Download generateDownloadWichObserverIs(boolean started){
-        Download download = new Download( null);
+        Download download = new Download( null,false);
         DownloadBean.DownloadObserver downloadObserver = downloadBean.new DownloadObserver();
         downloadObserver.setStarted(started);
         download.addObserver((a,b) -> {

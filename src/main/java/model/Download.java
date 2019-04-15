@@ -21,13 +21,19 @@ public class Download implements Runnable, Observable {
 
     List<Observer> observers;
 
+    boolean overwrite;
+
     @Getter
     MediaToolExecutor executor;
 
-    public Download(Record record){
+    public Download(Record record, boolean overwrite){
         this.record = record;
         observers = new LinkedList<>();
+        this.overwrite = overwrite;
+    }
 
+    public boolean isOverwrite(){
+        return overwrite;
     }
 
     @Override

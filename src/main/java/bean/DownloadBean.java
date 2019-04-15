@@ -93,8 +93,8 @@ public class DownloadBean implements DownloadBeanInterface {
 
     @Override
     @Lock(READ)
-    public Download prepareDownload(Record record, List<Observer> observers) {
-        Download prepare = new Download(record);
+    public Download prepareDownload(Record record, boolean overwrite, List<Observer> observers) {
+        Download prepare = new Download(record,overwrite);
         prepare.addObserver(new DownloadObserver());
         prepare.addObserver(new LogObserver(record));
         for (Observer o : observers){

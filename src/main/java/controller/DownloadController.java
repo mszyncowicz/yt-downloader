@@ -95,7 +95,7 @@ public class DownloadController {
         recordService.save(record);
         sessionService.save(session);
         userTransaction.commit();
-        downloadBeanInterface.prepareDownload(record, Collections.emptyList());
+        downloadBeanInterface.prepareDownload(record, parametersDTO.isOverwrite(),Collections.emptyList());
 
         return returnEntity(record);
     }

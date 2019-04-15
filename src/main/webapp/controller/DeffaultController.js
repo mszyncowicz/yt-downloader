@@ -18,7 +18,9 @@ app.controller('sessionCtrl', ['$scope','$interval','sessionFactory','downloadRe
     $scope.overwriteOnChange = function(){
             console.log("overwrite on change " + $scope.overwrite)
             var overwriteBool = $scope.overwrite
-            window.localStorage.setItem('overwrite',overwriteBool)
+            console.log("changed to " + overwriteBool)
+
+        window.localStorage.setItem('overwrite',overwriteBool)
     }
    $scope.advancedClick = function(){
        console.log("advanced")
@@ -33,7 +35,6 @@ app.controller('sessionCtrl', ['$scope','$interval','sessionFactory','downloadRe
             $scope.advanced.time = stringValue(data.length)
             $scope.advanced.thumbnail = data.thumbnail;
             $scope.advanced.slider = createSlider(data.length)
-            $scope.advanced.overwrite = $scope.overwrite
             $scope.advanced.url = url
             console.log($scope.advanced)
             $scope.isAdvanced = true;
@@ -73,6 +74,7 @@ app.controller('sessionCtrl', ['$scope','$interval','sessionFactory','downloadRe
         $scope.isAdvanced = false
         console.log($scope.advanced.slider.min)
         console.log($scope.advanced.slider.min)
+        $scope.advanced.overwrite = $scope.overwrite
         var req = DownloadRequestFactory.getAdvancedRequest($scope.advanced,SessionFactory.get())
         DownloadRequestFactory.initDownload(req).then(function(response){
             console.log(response);

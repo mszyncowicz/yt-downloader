@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface DownloadBeanInterface {
 
-    Download prepareDownload(Record record, List<Observer> observers);
+    Download prepareDownload(Record record, boolean overwrite, List<Observer> observers);
 
     boolean cancel(Record record);
 
