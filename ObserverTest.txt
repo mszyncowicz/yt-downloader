@@ -1,0 +1,19 @@
+P1: Starting new process youtube-dl --extract-audio --audio-format mp3 --audio-quality 0 https://www.youtube.com/watch?v=ecc_G1W8VvU 
+[youtube] ecc_G1W8VvU: Downloading webpage
+[youtube] ecc_G1W8VvU: Downloading video info webpage
+[download] Destination: Oxon - HipoPato cypher + Bazi, Delekta, Penx, Kojot, Zygson, Eripe (prod. TMK Beatz) (OneTake #9)-ecc_G1W8VvU.webm
+[download]   0.0% of 5.80MiB at 334.10KiB/s ETA 00:17
+[download]   0.1% of 5.80MiB at 751.13KiB/s ETA 00:07
+[download]   0.1% of 5.80MiB at  1.71MiB/s ETA 00:03 
+[download]   0.3% of 5.80MiB at  3.67MiB/s ETA 00:01 
+[download]   0.5% of 5.80MiB at  2.93MiB/s ETA 00:01 
+[download]   1.1% of 5.80MiB at  2.69MiB/s ETA 00:02 
+[download]   2.1% of 5.80MiB at  2.96MiB/s ETA 00:01 
+[download]   4.3% of 5.80MiB at  3.27MiB/s ETA 00:01 
+[download]   8.6% of 5.80MiB at  4.75MiB/s ETA 00:01 
+[download]  17.2% of 5.80MiB at  6.46MiB/s ETA 00:00 
+[download]  34.4% of 5.80MiB at  8.06MiB/s ETA 00:00 
+[download]  68.9% of 5.80MiB at  8.97MiB/s ETA 00:00 
+[download] 100.0% of 5.80MiB at  9.58MiB/s ETA 00:00 
+[download] 100% of 5.80MiB in 00:00                  
+[ffmpeg] Destination: Oxon - HipoPato cypher + Bazi, Delekta, Penx, Kojot, Zygson, Eripe (prod. TMK Beatz) (OneTake #9)-ecc_G1W8VvU.mp3

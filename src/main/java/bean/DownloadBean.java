@@ -67,8 +67,6 @@ public class DownloadBean implements DownloadBeanInterface {
         downloadList = new ArrayList<>(executorBean.getThreadsNumber());
         downloadList = new ArrayList<>(executorBean.getThreadsNumber());
         scanForNotDownloaded();
-
-
     }
 
     void scanForNotDownloaded() {

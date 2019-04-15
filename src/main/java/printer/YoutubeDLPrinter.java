@@ -7,11 +7,11 @@ import downloader.YoutubeDLCommander;
 import java.util.Map;
 
 public class YoutubeDLPrinter implements LinkPrinter {
-    private static final String PRINT_JSON = "--print-json ";
+    private static final String PRINT_JSON = "--print-json --skip-download";
 
     @Override
     public String getCommand(Map<String, String> args) throws WrongParametersException {
-        return args.get("youtube-dl " + Args.url.name()) + " " + PRINT_JSON;
+        return "youtube-dl " + args.get(Args.url.name()) + " " + PRINT_JSON;
     }
 
     @Override

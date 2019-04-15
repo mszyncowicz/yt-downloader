@@ -8,6 +8,7 @@ import model.State;
 import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -145,18 +146,18 @@ public class DownloadBeanTest {
     }
 
     @Test
-    public void shouldScanForRecordsAndStartDownloading(){
+    public void shouldScanForRecordsAndNotStartDownloading(){
         ArrayList<Download> downloadList = new ArrayList<>();
         downloadBean.setDownloadList(downloadList);
 
         downloadBean.scanForNotDownloaded();
 
-        verify(downloadBean,times(3)).prepareDownload(anyObject(),anyObject());
+        verify(downloadBean,times(0)).prepareDownload(anyObject(),anyObject());
+        verify(downloadBean,times(recordService.getNotDownloaded().size())).removeUnfinished(anyObject());
 
-        verify(executorBeanInterface,times(3)).start(any());
+        verify(executorBeanInterface,times(0)).start(any());
 
-        List<Record> collect = downloadList.stream().map(d -> d.getRecord()).collect(Collectors.toList());
-        Assert.assertTrue(collect.containsAll(recordService.getNotDownloaded()));
+        Assert.assertTrue(downloadList.isEmpty());
     }
 
     @Test

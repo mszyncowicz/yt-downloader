@@ -38,7 +38,7 @@ public class FileMoverBean implements FileMoverBeanInterface {
 
         Optional<File> outputFile = (Optional<File>) download.getExecutor().getOutputFile();
         if (!outputFile.isPresent()){
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("File does not exist");
         }
 
         File dir;

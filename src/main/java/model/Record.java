@@ -41,6 +41,7 @@ public class Record {
     private Date date;
 
     public Record(){
+        this.id = UUID.randomUUID();
     }
 
     public Record(String link, String command){
