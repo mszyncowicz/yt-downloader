@@ -9,4 +9,5 @@ import java.util.List;
 @Setter
 public class LogObserversDTO {
     public List<LogObserverDTO> logObserversDTOList;
+    public boolean hasAnyErrors = false;
 }

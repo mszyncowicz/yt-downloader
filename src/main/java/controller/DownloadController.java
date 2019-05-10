@@ -4,6 +4,8 @@ import api.Commander;
 import api.Observer;
 import bean.DownloadBeanInterface;
 import java.time.Duration;
+
+import bean.ErrorQueueBeanInterface;
 import downloader.LogObserver;
 import downloader.WrongParametersException;
 import downloader.YoutubeDLCommander;
@@ -62,6 +64,11 @@ public class DownloadController {
     @Setter
     @Inject
     DownloadBeanInterface downloadBeanInterface;
+
+    @Any
+    @Setter
+    @Inject
+    ErrorQueueBeanInterface errorQueueBeanInterface;
 
 
     @POST
@@ -184,6 +191,10 @@ public class DownloadController {
             }
         }
 
+        if(errorQueueBeanInterface.hasErrorForSession(token)){
+            logObserversDTO.setHasAnyErrors(true);
+        }
+
         return returnEntity(logObserversDTO);
     }
 
@@ -207,6 +218,21 @@ public class DownloadController {
                 .filter(d -> d instanceof LogObserver)
                 .findAny()
                 .get());
+    }
+
+    @GET
+    @Path("/error")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getError(@HeaderParam("X-session-token") String token){
+        if (!sessionExist(token)){
+            return Response.status(405).entity(GeneralMessageDTO.getInvalidSession()).build();
+        }
+
+       if (errorQueueBeanInterface.hasErrorForSession(token)){
+           return returnEntity(errorQueueBeanInterface.dequeForSession(token));
+       } else {
+           return Response.status(404).entity(GeneralMessageDTO.getMessage(404,"Error message was not found")).build();
+       }
     }
 
     Response returnEntity(Object entity){

@@ -4,9 +4,11 @@ import api.Observable;
 import api.Observer;
 import ch.qos.logback.core.util.FileUtil;
 import downloader.LogObserver;
+import downloader.MediaToolExecutor;
 import lombok.Getter;
 import lombok.Setter;
 import model.Download;
+import model.ErrorMessage;
 import model.Record;
 import model.State;
 import org.apache.commons.io.FileUtils;
@@ -51,6 +53,10 @@ public class DownloadBean implements DownloadBeanInterface {
     @Inject
     @Setter
     FileMoverBeanInterface fileMoverBeanInterface;
+
+    @Inject
+    @Setter
+    ErrorQueueBeanInterface errorQueeBeanInterface;
 
     @Getter
     @Setter
@@ -131,6 +137,12 @@ public class DownloadBean implements DownloadBeanInterface {
     }
 
     void removeFinished(Download download){
+        if (download.getExecutor() != null && download.getExecutor().isError()){
+            MediaToolExecutor executor = download.getExecutor();
+            Record record = download.getRecord();
+            ErrorMessage errorMessage = new ErrorMessage(executor.getErrorMessage(), record.getLink(), record.getSession().getToken());
+            errorQueeBeanInterface.enqueue(errorMessage);
+        }
         downloadList.remove(download);
 
         if (download.getExecutor() != null && download.getExecutor().getOutputFile() != null){

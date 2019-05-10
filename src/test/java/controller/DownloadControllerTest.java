@@ -1,6 +1,7 @@
 package controller;
 
 import bean.DownloadBeanInterface;
+import bean.ErrorQueueBeanInterface;
 import downloader.LogObserver;
 import downloader.YoutubeDLCommander;
 import dto.LogObserverDTO;
@@ -37,11 +38,13 @@ public class DownloadControllerTest {
 
     DownloadBeanInterface downloadBeanMock;
 
+    ErrorQueueBeanInterface errorQueueBeanInterface;
     @Before
     public void init() {
         downloadController = spy(DownloadController.class);
         RecordService recordServiceMock = mock(RecordService.class);
         ManagedExecutorService managedExecutorService = mock(ManagedExecutorService.class);
+
         //downloadController.setExecutorService(managedExecutorService);
         objectListsToSave = new LinkedList<>();
 
@@ -60,6 +63,8 @@ public class DownloadControllerTest {
             }
         };
         downloadController.setUserTransaction(userTransactionMock);
+        errorQueueBeanInterface = mock(ErrorQueueBeanInterface.class);
+        downloadController.setErrorQueueBeanInterface(errorQueueBeanInterface);
         when(recordServiceMock.save(any())).then(a -> {
             Record rec = a.getArgumentAt(0, Record.class);
             int status = userTransactionMock.getStatus();
@@ -149,8 +154,7 @@ public class DownloadControllerTest {
                 Assert.assertTrue(record.getId().toString().equals(logObserverDTO.getRecordUUID()));
                 Assert.assertTrue(record.getState().name().equals(logObserverDTO.getState()));
                 Assert.assertTrue(Float.compare(percentage,logObserverDTO.getPercentage()) == 0);
-                result = true;
-            } else if (argumentAt instanceof LogObserver){
+                Assert.assertFalse(logOberversDto.hasAnyErrors);
                 result = true;
             }
             atomicBoolean.set(result);
@@ -164,14 +168,54 @@ public class DownloadControllerTest {
         verify(observer,times(1)).getPercentage();
         verify(observer,times(1)).getRecord();
         verify(downloadController,times(1)).sessionExist(anyString());
+        verify(errorQueueBeanInterface).hasErrorForSession(token);
 
         Assert.assertTrue(atomicBoolean.get());
+
+    }
+
+    @Test
+    public void getSingleLogObserver(){
+
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        List<Download> downloads = new ArrayList<>();
+        Record record = new Record();
+        UUID id = UUID.randomUUID();
+        String token = Session.generateRandom(Session.scale);
+
+        record.setId(id);
+        record.setState(State.downloading);
+        Session session = new Session();
+        record.setSession(session);
+        session.setToken(token);
+        Download download = new Download(record,true);
+        LogObserver observer = mock(LogObserver.class);
+        String last_message = "Last Message";
+        when(observer.getLastMessage()).thenReturn(last_message);
+        when(observer.getRecord()).thenReturn(record);
+        float percentage = 55.5f;
+        when(observer.getPercentage()).thenReturn(percentage);
+
+        download.addObserver(observer);
+        downloads.add(download);
+        when(downloadBeanMock.getStartedDownloads()).thenReturn(downloads);
+
+        doAnswer(a -> {
+            Object argumentAt = a.getArgumentAt(0, Object.class);
+            boolean result = false;
+            if (argumentAt instanceof LogObserver){
+                result = true;
+            }
+            atomicBoolean.set(result);
+            return null;
+        }).when(downloadController).returnEntity(anyObject());
+
         atomicBoolean.set(false);
         downloadController.getLogObserver(token, id.toString());
         Assert.assertTrue(atomicBoolean.get());
 
     }
-
     @Test
     public void shouldNotMatchHours(){
         String toMatch = "00:03:23";

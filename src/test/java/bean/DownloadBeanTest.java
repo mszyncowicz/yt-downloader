@@ -3,8 +3,8 @@ package bean;
 import api.Observable;
 import api.Observer;
 import downloader.MediaToolExecutor;
-import model.Download;
-import model.State;
+import model.*;
+
 import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import model.Record;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class DownloadBeanTest {
         downloadBean.setExecutorBean(executorBeanInterface);
         downloadBean.setRecordService(recordService);
         downloadBean.setLogger(LoggerFactory.getLogger(DownloadBeanTest.class));
-
+        downloadBean.setErrorQueeBeanInterface(mock(ErrorQueueBeanInterface.class));
         List<Record> notDownloaded = new LinkedList<>();
         notDownloaded.add(new Record());
         notDownloaded.add(new Record());
@@ -107,9 +107,30 @@ public class DownloadBeanTest {
     }
 
     @Test
+    public void removeFinishedDownload_failed(){
+        List<Download> downloads = new ArrayList<>();
+        Record record = new Record();
+        record.setState(State.finalizing);
+        Session session = new Session();
+        session.setToken("token");
+        record.setSession(session);
+        Download downloadToRemove = mock(Download.class, Mockito.CALLS_REAL_METHODS);
+        MediaToolExecutor mockedExecutor = mock(MediaToolExecutor.class);
+        when(mockedExecutor.isError()).thenReturn(true);
+        when(downloadToRemove.getRecord()).thenReturn(record);
+        when(downloadToRemove.getExecutor()).thenReturn(mockedExecutor);
+        when(mockedExecutor.getErrorMessage()).thenReturn("error");
+        downloads.add(downloadToRemove);
+        downloadBean.setDownloadList(downloads);
+        downloadBean.removeFinished(downloadToRemove);
+
+        verify(downloadBean.errorQueeBeanInterface).enqueue(new ErrorMessage("error",record.getLink(),record.getSession().getToken()));
+        Assert.assertFalse(downloads.contains(downloadToRemove));
+    }
+
+    @Test
     public void cancel(){
         List<Runnable> addedToQueue = new LinkedList<>();
-
         doAnswer(a->{
             Runnable argumentAt = a.getArgumentAt(0, Runnable.class);
             addedToQueue.add(argumentAt);
