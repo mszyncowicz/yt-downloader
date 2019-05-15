@@ -12,6 +12,7 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -77,7 +78,7 @@ public class FileMoverBean implements FileMoverBeanInterface {
                 fileName = getNewFileName(destDir, fileName);
             }
             File destFile = new File(destDir, fileName);
-            copyFile(srcFile, destFile, true);
+            copyFile(srcFile, destFile, !overwrite);
         }
     }
 
