@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.logging.Level;
 
 
 @Slf4j
@@ -76,6 +77,11 @@ public class Main {
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
         StatusPrinter.print(lc);
         log.info("Successfully initialized file database");
+    }
+
+    @PostConstruct
+    public void turnOffHibernateLog() {
+        java.util.logging.Logger.getLogger("stdout").setLevel(Level.SEVERE);
     }
 
     @Schedule(hour = "*/1",persistent = false)

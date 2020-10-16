@@ -27,7 +27,8 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Getter
     private EntityManager entityManager;
 
-    public static Logger logger = LoggerFactory.getLogger(SessionRepository.class);
+    @Inject
+    private Logger logger;
 
     @Override
     public void setEntityManager(EntityManager entityManager) {
@@ -53,7 +54,6 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public Session getByToken(String token) {
         try {
-            logger.info(entityManager.toString());
             Query query = entityManager.createQuery("SELECT s from Session s WHERE s.token = :token", Session.class);
             query.setParameter("token", token);
             Session singleResult = (Session) query.getSingleResult();

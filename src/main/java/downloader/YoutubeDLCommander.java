@@ -3,8 +3,6 @@ package downloader;
 import api.Commander;
 import lombok.Builder;
 import lombok.Getter;
-import org.apache.activemq.artemis.utils.UUID;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -22,22 +20,24 @@ public class YoutubeDLCommander implements Commander {
     private static final String BEST_VIDEO = "-f \"bestvideo\" --recode-video mp4 --postprocessor-args \"-c:v nvenc" +
             " -rc constqp -qp 23 -preset llhq ?PA\" ";
     private static final String BEST_AUDIO = "--extract-audio --audio-format mp3 --audio-quality 0 --postprocessor-args \"?PA\" ";
+    private static final String BEST_AUDIOVIDEO = "-f \"best\" --recode-video mp4 --postprocessor-args \"-c:v nvenc" +
+            " -rc constqp -qp 23 -preset llhq ?PA\" ";
+    private boolean skipDownload;
+    private boolean printJson;
+    private boolean listFormats;
+    private boolean bestVideo;
+    private boolean bestAudio;
 
-    private boolean skipDownload = false;
-    private boolean printJson = false;
-    private boolean listFormats = false;
-    private boolean bestVideo = false;
-    private boolean bestAudio = false;
-    private boolean isTimed = false;
+    String postargs;
 
     @Getter
-    String[] required = {};
+    String[] required;
 
     private void setRequired(String[] required) {
         this.required = required;
     }
 
-    public static YoutubeDLCommander getBestVideo(){
+    public static YoutubeDLCommander getBestVideo() {
         String[] required = {URL_PARAM, UUID_PARAM};
         YoutubeDLCommanderBuilder youtubeDLCommanderBuilder = new YoutubeDLCommanderBuilder();
         youtubeDLCommanderBuilder.skipDownload(false)
@@ -48,19 +48,20 @@ public class YoutubeDLCommander implements Commander {
                 .required(required);
         return youtubeDLCommanderBuilder.build();
     }
-    public static YoutubeDLCommander getBestVideoTimed(){
-        String[] required = {URL_PARAM, UUID_PARAM,TIME_PARAM};
+
+    public static YoutubeDLCommander getBestAudioVideo() {
+        String[] required = {URL_PARAM, UUID_PARAM};
         YoutubeDLCommanderBuilder youtubeDLCommanderBuilder = new YoutubeDLCommanderBuilder();
         youtubeDLCommanderBuilder.skipDownload(false)
                 .printJson(false)
                 .listFormats(false)
                 .bestVideo(true)
-                .bestAudio(false)
-                .isTimed(true)
+                .bestAudio(true)
                 .required(required);
         return youtubeDLCommanderBuilder.build();
     }
-    public static YoutubeDLCommander getBestAudio(){
+
+    public static YoutubeDLCommander getBestAudio() {
         String[] required = {URL_PARAM, UUID_PARAM};
         YoutubeDLCommanderBuilder youtubeDLCommanderBuilder = new YoutubeDLCommanderBuilder();
         youtubeDLCommanderBuilder.skipDownload(false)
@@ -71,19 +72,8 @@ public class YoutubeDLCommander implements Commander {
                 .required(required);
         return youtubeDLCommanderBuilder.build();
     }
-    public static YoutubeDLCommander getBestAudioTimed(){
-        String[] required = {URL_PARAM, UUID_PARAM,TIME_PARAM};
-        YoutubeDLCommanderBuilder youtubeDLCommanderBuilder = new YoutubeDLCommanderBuilder();
-        youtubeDLCommanderBuilder.skipDownload(false)
-                .printJson(false)
-                .listFormats(false)
-                .bestVideo(false)
-                .bestAudio(true)
-                .isTimed(true)
-                .required(required);
-        return youtubeDLCommanderBuilder.build();
-    }
-    public static YoutubeDLCommander printJSON(){
+
+    static YoutubeDLCommander printJSON() {
         String[] required = {URL_PARAM};
         YoutubeDLCommanderBuilder youtubeDLCommanderBuilder = new YoutubeDLCommanderBuilder();
         youtubeDLCommanderBuilder.printJson(true)
@@ -95,34 +85,43 @@ public class YoutubeDLCommander implements Commander {
         return youtubeDLCommanderBuilder.build();
     }
 
-    public String getCommand(Map<String,String> args){
-        Commander.super.argsCheck(args,required);
+    public String getCommand(Map<String, String> args) {
+        Commander.super.argsCheck(args, required);
         StringBuffer buffer = new StringBuffer();
         buffer.append("youtube-dl ");
+        postargs = "";
         String source = args.get(URL_PARAM);
         if (source == null) throw new IllegalArgumentException("No url in arguments");
         if (skipDownload) buffer.append(SKIP_DOWNLOAD);
-        if (bestAudio){
-            String bestAudioFormat = BEST_AUDIO;
-            String format = args.get(AUDIO_FORMAT_PARAM);
-            if (format != null){
-                bestAudioFormat.replace("mp3", format);
+        if (bestVideo && bestAudio)
+        {
+            buffer.append(BEST_AUDIOVIDEO);
+        } else {
+            if (bestAudio) {
+                String bestAudioFormat = BEST_AUDIO;
+                String format = args.get(AUDIO_FORMAT_PARAM);
+                if (format != null) {
+                    bestAudioFormat.replace("mp3", format);
+                }
+                buffer.append(bestAudioFormat);
             }
-            buffer.append(bestAudioFormat);
+            else buffer.append(BEST_VIDEO);
         }
-        if (bestVideo) buffer.append(BEST_VIDEO);
-        if (listFormats)buffer.append(LIST_FORMATS);
-        String postArgs = "";
-        if (isTimed) {
-            String timeArg = args.get(TIME_PARAM);
-            postArgs = postArgs + timeArg;
-        }
+        if (listFormats) buffer.append(LIST_FORMATS);
+        setTime(args);
         buffer.append(source + " ");
         String output = args.get(OUTPUT_PARAM);
-        if (output != null){
+        if (output != null) {
             buffer.append("-o " + output);
         }
-        return buffer.toString().replace("?PA",postArgs);
+        return buffer.toString().replace("?PA", postargs);
+    }
+
+    private void setTime(Map<String, String> args) {
+        if (args.containsKey(TIME_PARAM)) {
+            String timeArg = args.get(TIME_PARAM);
+            postargs = postargs + timeArg;
+        }
     }
 
     @Override
@@ -135,13 +134,13 @@ public class YoutubeDLCommander implements Commander {
                 listFormats == that.listFormats &&
                 bestVideo == that.bestVideo &&
                 bestAudio == that.bestAudio &&
-                isTimed == that.isTimed &&
+                Objects.equals(postargs,that.postargs) &&
                 Arrays.equals(required, that.required);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(skipDownload, printJson, listFormats, bestVideo, bestAudio, isTimed);
+        int result = Objects.hash(skipDownload, printJson, listFormats, bestVideo, bestAudio);
         result = 31 * result + Arrays.hashCode(required);
         return result;
     }

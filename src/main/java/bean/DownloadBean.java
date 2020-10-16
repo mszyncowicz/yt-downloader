@@ -13,6 +13,8 @@ import model.Record;
 import model.State;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
+import qualifier.DownloadBeanQualifier;
+import qualifier.ErrorQueueBeanQualifier;
 import service.RecordService;
 
 
@@ -39,6 +41,7 @@ import static javax.ejb.LockType.READ;
 @Startup
 @ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
 @Named("DownloadBean")
+@DownloadBeanQualifier
 public class DownloadBean implements DownloadBeanInterface {
 
     @Setter
@@ -56,6 +59,7 @@ public class DownloadBean implements DownloadBeanInterface {
 
     @Inject
     @Setter
+    @ErrorQueueBeanQualifier
     ErrorQueueBeanInterface errorQueeBeanInterface;
 
     @Getter

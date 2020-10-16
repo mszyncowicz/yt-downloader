@@ -1,12 +1,14 @@
 package bean;
 
 import model.ErrorMessage;
+import qualifier.ErrorQueueBeanQualifier;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import java.util.*;
 
 @Singleton
+@ErrorQueueBeanQualifier
 public class ErrorQueueBean implements ErrorQueueBeanInterface {
 
     Map<String,Deque<ErrorMessage>> queue;

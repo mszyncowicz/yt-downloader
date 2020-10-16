@@ -2,14 +2,9 @@ package controller;
 
 import api.Commander;
 import api.Observer;
-import bean.DownloadBeanInterface;
-import java.time.Duration;
 
-import bean.ErrorQueueBeanInterface;
-import downloader.LogObserver;
-import downloader.WrongParametersException;
-import downloader.YoutubeDLCommander;
-import downloader.YoutubeDlCommanderParameters;
+import bean.DownloadBeanInterface;
+import downloader.*;
 import dto.*;
 
 import java.util.*;
@@ -18,16 +13,12 @@ import java.util.stream.Collectors;
 import lombok.Setter;
 import model.Download;
 import model.Session;
-import org.apache.commons.lang.time.DurationFormatUtils;
-import org.opensaml.xmlsec.signature.P;
 import printer.PrinterExecutor;
 import printer.YoutubeDLPrinter;
 import printer.YtJsonReader;
-import service.RecordService;
-import service.SessionService;
+import qualifier.DownloadInfoServiceQualifier;
+import service.*;
 
-import javax.annotation.Resource;
-import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import javax.transaction.*;
@@ -37,98 +28,40 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import model.Record;
-import sun.rmi.runtime.Log;
 
 
 //TODO make Session check in AOP
 @Path("/download")
 public class DownloadController {
 
-    static final String TIME_MATCHER = "[0-9]+";
+    @DownloadInfoServiceQualifier
+    @Setter
+    @Inject
+    DownloadInfoServiceInterface downloadInfo;
+
+    @Any
+    @Setter
+    @Inject
+    YtDownloaderServiceInterface downloaderService;
 
     @Any
     @Setter
     @Inject
     SessionService sessionService;
 
-    @Any
-    @Setter
-    @Inject
-    RecordService recordService;
-
-    @Setter
-    @Inject
-    UserTransaction userTransaction;
-
-    @Any
-    @Setter
-    @Inject
-    DownloadBeanInterface downloadBeanInterface;
-
-    @Any
-    @Setter
-    @Inject
-    ErrorQueueBeanInterface errorQueueBeanInterface;
-
 
     @POST
     @Path("/initialize")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
     public Response initializeDownload(@HeaderParam("X-session-token") String token, YTParametersDTO parametersDTO) throws HeuristicRollbackException, RollbackException, HeuristicMixedException, SystemException, NotSupportedException {
-        if (sessionService == null) throw new IllegalStateException("Session service is null");
-        if (recordService == null) throw new IllegalStateException("Record service is null");
-        if (downloadBeanInterface == null) throw new IllegalStateException("downloadBeanInterface is null");
         if (!sessionExist(token)){
             return Response.status(405).entity(GeneralMessageDTO.getInvalidSession()).build();
         }
+
         Session session = sessionService.getSessionByToken(token);
-        String link = parametersDTO.getUrl();
-        UUID id = UUID.randomUUID();
-        Map<String,String> parameters = new HashMap<>();
-        parameters.put(YoutubeDlCommanderParameters.uuid.name(),id.toString());
-        parameters.put(YoutubeDlCommanderParameters.url.name(),link);
-        String mediaType = parametersDTO.getMediaType();
-        String command = getCommand(parametersDTO, mediaType, parameters).getCommand(parameters);
-
-        Record record = new Record(link,command);
-        record.setMediaType(model.MediaType.valueOf(mediaType));
-
-        record.setId(id);
-        userTransaction.begin();
-        session = sessionService.getSessionByToken(session.getToken());
-        record.setSession(session);
-        session.getRecords().add(record);
-        recordService.save(record);
-        sessionService.save(session);
-        userTransaction.commit();
-        downloadBeanInterface.prepareDownload(record, parametersDTO.isOverwrite(),Collections.emptyList());
-
-        return returnEntity(record);
-    }
-
-
-    YoutubeDLCommander getCommand(YTParametersDTO parametersDTO, String mediaType, Map<String,String> parameters) {
-        if (mediaType.equals(model.MediaType.audio.name())){
-            if (parametersDTO.isTimed()){
-                Optional<String> postArgs = getPostArgs(parametersDTO.getTimeFrom(), parametersDTO.getTimeTo());
-                if (postArgs.isPresent()){
-                    parameters.put(YoutubeDLCommander.TIME_PARAM, postArgs.get());
-                    return YoutubeDLCommander.getBestAudioTimed();
-                }
-            }
-            return YoutubeDLCommander.getBestAudio();
-
-        } else {
-            if (parametersDTO.isTimed()){
-                Optional<String> postArgs = getPostArgs(parametersDTO.getTimeFrom(), parametersDTO.getTimeTo());
-                if (postArgs.isPresent()){
-                    parameters.put(YoutubeDLCommander.TIME_PARAM, postArgs.get());
-                    return YoutubeDLCommander.getBestVideoTimed();
-                }
-            }
-            return YoutubeDLCommander.getBestVideo();
-        }
+        return returnEntity(downloaderService.initializeDownload(session, parametersDTO));
     }
 
     @POST
@@ -151,7 +84,7 @@ public class DownloadController {
         }
     }
 
-    YtMediaDetails printJsonForUrl(String url) throws WrongParametersException {
+    private YtMediaDetails printJsonForUrl(String url) throws WrongParametersException {
         Commander commander = new YoutubeDLPrinter();
         Map<String, String> params = new HashMap<>();
         params.put(YoutubeDLCommander.URL_PARAM, url);
@@ -173,7 +106,7 @@ public class DownloadController {
         LinkedList<LogObserverDTO> logObserverDTOList = new LinkedList<>();
         logObserversDTO.setLogObserversDTOList(logObserverDTOList);
 
-        List<Download> startedDownloads = downloadBeanInterface.getStartedDownloads()
+        List<Download> startedDownloads = downloadInfo.getStartedDownloads()
                 .stream().filter(d -> d.getRecord().getSession().getToken().equals(token)).collect(Collectors.toList());
 
         for (Download d : startedDownloads){
@@ -191,7 +124,7 @@ public class DownloadController {
             }
         }
 
-        if(errorQueueBeanInterface.hasErrorForSession(token)){
+        if(downloadInfo.hasErrorForSession(token)){
             logObserversDTO.setHasAnyErrors(true);
         }
 
@@ -206,7 +139,7 @@ public class DownloadController {
             return Response.status(405).entity(GeneralMessageDTO.getInvalidSession()).build();
         }
 
-        Optional<Download> any = downloadBeanInterface.getStartedDownloads().stream().filter(d -> d.getRecord().getId().toString().equals(uuid)).findAny();
+        Optional<Download> any = downloadInfo.getStartedDownloads().stream().filter(d -> d.getRecord().getId().toString().equals(uuid)).findAny();
         if (!any.isPresent()) {
             return Response.status(500).entity(GeneralMessageDTO.getMessage(500,"Could not find observer with id")).build();
 
@@ -228,8 +161,8 @@ public class DownloadController {
             return Response.status(405).entity(GeneralMessageDTO.getInvalidSession()).build();
         }
 
-       if (errorQueueBeanInterface.hasErrorForSession(token)){
-           return returnEntity(errorQueueBeanInterface.dequeForSession(token));
+       if (downloadInfo.hasErrorForSession(token)){
+           return returnEntity(downloadInfo.dequeForSession(token));
        } else {
            return Response.status(404).entity(GeneralMessageDTO.getMessage(404,"Error message was not found")).build();
        }
@@ -244,17 +177,5 @@ public class DownloadController {
         return sessionService.getSessionByToken(token) != null;
     }
 
-    Optional<String> getPostArgs(String timeFrom, String timeTo) {
-        if (timeFrom == null || timeTo == null) return Optional.ofNullable(null);
 
-        else if (!timeFrom.matches(TIME_MATCHER) || !timeTo.matches(TIME_MATCHER)) return Optional.ofNullable(null);
-        else {
-            final Integer timeFromInt = Integer.valueOf(timeFrom);
-            final Integer timeToInt = Integer.valueOf(timeTo);
-            Duration durationFrom0ToStart = Duration.ofSeconds(timeFromInt);
-            Duration durationFrom0ToEnd = Duration.ofSeconds(timeToInt - timeFromInt);
-            String lvResult = "-ss " + DurationFormatUtils.formatDuration(durationFrom0ToStart.toMillis(),"HH:mm:ss", true) + " -t " + DurationFormatUtils.formatDuration(durationFrom0ToEnd.toMillis(),"HH:mm:ss", true);
-            return Optional.of(lvResult);
-        }
-    }
 }

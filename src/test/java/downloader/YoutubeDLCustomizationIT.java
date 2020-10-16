@@ -28,7 +28,7 @@ public class YoutubeDLCustomizationIT {
 
     @Test
     public void basicTest() throws WrongParametersException {
-        YoutubeDLCommander customization = YoutubeDLCommander.getBestAudio();
+        YoutubeDLCommander customization = YoutubeDLCommander.getBestAudioVideo();
         Map<String,String > args = new HashMap<>();
         args.put("url","https://www.youtube.com/watch?v=YO8c7CjmS_E");
         String value = UUID.randomUUID().toString();
