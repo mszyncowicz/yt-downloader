@@ -3,17 +3,18 @@ package service;
 import data.RecordRepository;
 import model.State;
 import org.hibernate.validator.cfg.defs.AssertTrueDef;
-import org.junit.Assert;
-import org.junit.Before;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import model.Record;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class RecordServiceTest {
 
@@ -23,15 +24,15 @@ public class RecordServiceTest {
 
     List<Record> objectList;
 
-    @Before
+    @BeforeEach
     public void init(){
         recordService = new RecordServiceImpl();
         RecordRepository recordRepositoryMock = mock(RecordRepository.class);
         recordService.setRecordRepository(recordRepositoryMock);
         objectList = new LinkedList<>();
 
-        when(recordRepositoryMock.save(anyObject())).then(a ->{
-            Record argumentAt = a.getArgumentAt(0, Record.class);
+        when(recordRepositoryMock.save(any())).then(a ->{
+            Record argumentAt = a.getArgument(0, Record.class);
             objectList.add(argumentAt);
             return argumentAt;
         });
@@ -49,8 +50,8 @@ public class RecordServiceTest {
     public void saveTest(){
         Record record = new Record();
         Record save = recordService.save(record);
-        Assert.assertTrue(objectList.size() > 0);
-        Assert.assertTrue(record.equals(save));
+        Assertions.assertTrue(objectList.size() > 0);
+        Assertions.assertTrue(record.equals(save));
     }
 
     @Test
@@ -83,7 +84,7 @@ public class RecordServiceTest {
         }
 
         List<Record> notDownloaded = recordService.getNotDownloaded();
-        Assert.assertTrue(notDownloaded != null);
-        Assert.assertTrue(notDownloaded.size() == numOfDownloading);
+        Assertions.assertTrue(notDownloaded != null);
+        Assertions.assertTrue(notDownloaded.size() == numOfDownloading);
     }
 }

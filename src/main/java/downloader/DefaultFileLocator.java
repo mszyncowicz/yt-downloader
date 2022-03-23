@@ -28,7 +28,7 @@ public class DefaultFileLocator implements FileLocator {
         try {
             log.info("Begining localization proccess");
             while ((line = bri.readLine()) != null) {
-                if (line.toLowerCase().contains("destination") || line.toLowerCase().contains("file")){
+                if (line.toLowerCase().contains("destination") || line.toLowerCase().contains("file") || line.toLowerCase().contains("formats")){
                     files.add(line);
                     log.info("added " + line);
                 }
@@ -52,7 +52,10 @@ public class DefaultFileLocator implements FileLocator {
         for (File file : listOfFiles) {
             if (file.isFile()) {
                 for (String name : names){
-
+                    if (result == null)
+                    {
+                        result = file;
+                    }
                     String nameReplaceAll = name.replaceAll("[^\\w\\s]", "");
                     String fileNameReplaceAll = file.getName().replaceAll("[^\\w\\s]", "");
                     log.info(nameReplaceAll + " vs " + fileNameReplaceAll + " = "+ nameReplaceAll.contains(fileNameReplaceAll));
@@ -62,7 +65,6 @@ public class DefaultFileLocator implements FileLocator {
                     }
                 }
             }
-
         }
         return result;
     }

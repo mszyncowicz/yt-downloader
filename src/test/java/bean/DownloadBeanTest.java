@@ -6,16 +6,20 @@ import downloader.MediaToolExecutor;
 import model.*;
 
 import java.util.UUID;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import model.Record;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.LoggerFactory;
 import service.RecordService;
 
@@ -28,7 +32,8 @@ import java.util.stream.IntStream;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@ExtendWith(MockitoExtension.class)
 public class DownloadBeanTest {
 
     @Spy
@@ -41,7 +46,7 @@ public class DownloadBeanTest {
     @Mock
     RecordService recordService;
 
-    @Before
+    @BeforeEach
     public void init(){
         downloadBean.setExecutorBean(executorBeanInterface);
         downloadBean.setRecordService(recordService);
@@ -60,7 +65,7 @@ public class DownloadBeanTest {
         List mockList = mock(List.class);
         when(mockList.size()).thenReturn(20000);
         downloadBean.setDownloadList(mockList);
-        Assert.assertTrue(downloadBean.isFull());
+        Assertions.assertTrue(downloadBean.isFull());
     }
 
     @Test
@@ -71,8 +76,8 @@ public class DownloadBeanTest {
         TestObserver mock = mock(TestObserver.class);
         Download download = downloadBean.prepareDownload(new Record(), true, Arrays.asList(mock));
 
-        Assert.assertTrue(downloads.contains(download));
-        Assert.assertTrue(download.getObservers().contains(mock));
+        Assertions.assertTrue(downloads.contains(download));
+        Assertions.assertTrue(download.getObservers().contains(mock));
 
         verify(executorBeanInterface,times(1)).start(download);
 
@@ -89,7 +94,7 @@ public class DownloadBeanTest {
         mediaToolExecutor.addObserver(downloadObserver);
         mediaToolExecutor.updateObservers("line");
 
-        Assert.assertTrue(downloadObserver.isStarted());
+        Assertions.assertTrue(downloadObserver.isStarted());
     }
 
     @Test
@@ -102,7 +107,7 @@ public class DownloadBeanTest {
         downloadBean.setDownloadList(downloads);
         downloadBean.removeFinished(downloadToRemove);
 
-        Assert.assertFalse(downloads.contains(downloadToRemove));
+        Assertions.assertFalse(downloads.contains(downloadToRemove));
 
     }
 
@@ -125,22 +130,22 @@ public class DownloadBeanTest {
         downloadBean.removeFinished(downloadToRemove);
 
         verify(downloadBean.errorQueeBeanInterface).enqueue(new ErrorMessage("error",record.getLink(),record.getSession().getToken()));
-        Assert.assertFalse(downloads.contains(downloadToRemove));
+        Assertions.assertFalse(downloads.contains(downloadToRemove));
     }
 
     @Test
     public void cancel(){
         List<Runnable> addedToQueue = new LinkedList<>();
         doAnswer(a->{
-            Runnable argumentAt = a.getArgumentAt(0, Runnable.class);
+            Runnable argumentAt = a.getArgument(0, Runnable.class);
             addedToQueue.add(argumentAt);
             return null;
-        }).when(executorBeanInterface).start(anyObject());
+        }).when(executorBeanInterface).start(any());
 
         doAnswer(a->{
-            Runnable argumentAt = a.getArgumentAt(0, Runnable.class);
+            Runnable argumentAt = a.getArgument(0, Runnable.class);
             return addedToQueue.remove(argumentAt);
-        }).when(executorBeanInterface).removeWhenNotStarted(anyObject());
+        }).when(executorBeanInterface).removeWhenNotStarted(any());
 
         Record record = new Record();
         record.setId(UUID.randomUUID());
@@ -150,11 +155,11 @@ public class DownloadBeanTest {
 
         downloadBean.setDownloadList(downloads);
         executorBeanInterface.start(download);
-        Assert.assertTrue(addedToQueue.contains(download));
+        Assertions.assertTrue(addedToQueue.contains(download));
         downloadBean.cancel(record);
 
-        Assert.assertFalse(downloads.contains(download));
-        Assert.assertFalse(addedToQueue.contains(download));
+        Assertions.assertFalse(downloads.contains(download));
+        Assertions.assertFalse(addedToQueue.contains(download));
 
     }
 
@@ -173,34 +178,34 @@ public class DownloadBeanTest {
 
         downloadBean.scanForNotDownloaded();
 
-        verify(downloadBean,times(0)).prepareDownload(anyObject(),anyBoolean(),anyObject());
-        verify(downloadBean,times(recordService.getNotDownloaded().size())).removeUnfinished(anyObject());
+        verify(downloadBean,times(0)).prepareDownload(any(),anyBoolean(),any());
+        verify(downloadBean,times(recordService.getNotDownloaded().size())).removeUnfinished(any());
 
         verify(executorBeanInterface,times(0)).start(any());
 
-        Assert.assertTrue(downloadList.isEmpty());
+        Assertions.assertTrue(downloadList.isEmpty());
     }
 
     @Test
     public void getStartedDownloadsTest(){
         List<Download> downloads = new ArrayList<>();
         IntStream.range(0,45)
-                .peek(p -> downloads.add(generateDownloadWichObserverIs(true)))
-                .count();
+                .forEach(p -> downloads.add(generateDownloadWichObserverIs(true)));
+
         List<Download> started = new ArrayList<>();
         started.addAll(downloads);
         IntStream.range(0,23)
-                .peek(p -> downloads.add(generateDownloadWichObserverIs(false)))
-                .count();
+                .forEach(p -> downloads.add(generateDownloadWichObserverIs(false)));
+
 
         downloadBean.setDownloadList(downloads);
         List<Download> startedDownloads = downloadBean.getStartedDownloads();
 
-        Assert.assertTrue(started != null);
-        Assert.assertEquals(45, startedDownloads.size());
+        Assertions.assertTrue(started != null);
+        Assertions.assertEquals(45, startedDownloads.size());
 
         for (Download d : started){
-            Assert.assertTrue(startedDownloads.contains(d));
+            Assertions.assertTrue(startedDownloads.contains(d));
         }
 
     }

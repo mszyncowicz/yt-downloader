@@ -41,9 +41,13 @@ public class LogObserver implements Observer {
             lastMessage = string;
 
             if (title == null){
-                if (string.toLowerCase().contains("destination")){
+                if (string.toLowerCase().contains("destination")) {
                     int start = string.indexOf(':') + 1;
-                    int end  = string.lastIndexOf('-');
+                    int end = string.lastIndexOf('-');
+                    if (end == -1)
+                    {
+                        end = string.length();
+                    }
                     title = string.substring(start,end);
                 }
             }

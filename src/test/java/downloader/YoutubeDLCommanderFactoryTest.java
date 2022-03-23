@@ -2,8 +2,8 @@ package downloader;
 
 import dto.YTParametersDTO;
 import model.MediaType;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
@@ -19,9 +19,9 @@ public class YoutubeDLCommanderFactoryTest {
 
         YoutubeDLCommander command = factoryInterface.getCommand(parametersDTO, parameters);
 
-        Assert.assertEquals(command,YoutubeDLCommander.getBestAudio());
+        Assertions.assertEquals(command,YoutubeDLCommander.getBestAudio());
         String shouldReturn = "-ss 00:00:12 -t 00:00:01";
-        Assert.assertEquals(shouldReturn,parameters.get(YoutubeDLCommander.TIME_PARAM));
+        Assertions.assertEquals(shouldReturn,parameters.get(YoutubeDLCommander.TIME_PARAM));
     }
 
     @Test
@@ -58,8 +58,8 @@ public class YoutubeDLCommanderFactoryTest {
     }
 
     private void assertNotTImed(HashMap<String, String> parameters, YoutubeDLCommander command) {
-        Assert.assertEquals(command, YoutubeDLCommander.getBestAudio());
-        Assert.assertNull(parameters.get(YoutubeDLCommander.TIME_PARAM));
+        Assertions.assertEquals(command, YoutubeDLCommander.getBestAudio());
+        Assertions.assertNull(parameters.get(YoutubeDLCommander.TIME_PARAM));
     }
 
     private YTParametersDTO getTimedYtParametersDTO(String mediaType, String timeFrom, String timeTo) {
@@ -79,7 +79,7 @@ public class YoutubeDLCommanderFactoryTest {
         parametersDTO.setMediaType(mediaType);
 
         YoutubeDLCommander command = factoryInterface.getCommand(parametersDTO, new HashMap<>());
-        Assert.assertEquals(YoutubeDLCommander.getBestAudio(),command);
+        Assertions.assertEquals(YoutubeDLCommander.getBestAudio(),command);
     }
     @Test
     public void shouldReturnAudio2(){
@@ -92,7 +92,7 @@ public class YoutubeDLCommanderFactoryTest {
         parametersDTO.setTimeTo("00:00:132");
 
         YoutubeDLCommander command = factoryInterface.getCommand(parametersDTO, new HashMap<>());
-        Assert.assertEquals(YoutubeDLCommander.getBestAudio(),command);
+        Assertions.assertEquals(YoutubeDLCommander.getBestAudio(),command);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class YoutubeDLCommanderFactoryTest {
         parametersDTO.setTimeTo("13");
 
         YoutubeDLCommander command = factoryInterface.getCommand(parametersDTO, new HashMap<>());
-        Assert.assertEquals(YoutubeDLCommander.getBestVideo(),command);
+        Assertions.assertEquals(YoutubeDLCommander.getBestVideo(),command);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class YoutubeDLCommanderFactoryTest {
 
 
         YoutubeDLCommander command = factoryInterface.getCommand(parametersDTO, new HashMap<>());
-        Assert.assertEquals(YoutubeDLCommander.getBestVideo(),command);
+        Assertions.assertEquals(YoutubeDLCommander.getBestVideo(),command);
     }
 
     @Test
@@ -132,6 +132,6 @@ public class YoutubeDLCommanderFactoryTest {
         parametersDTO.setTimeTo("00:00:123");
 
         YoutubeDLCommander command = factoryInterface.getCommand(parametersDTO, new HashMap<>());
-        Assert.assertEquals(YoutubeDLCommander.getBestVideo(),command);
+        Assertions.assertEquals(YoutubeDLCommander.getBestVideo(),command);
     }
 }

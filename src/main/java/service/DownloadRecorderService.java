@@ -26,6 +26,7 @@ public class DownloadRecorderService implements DownloadRecorderServiceInterface
     public Record addRecordDownload(Session session, Record record) {
         record.setSession(session);
         session.getRecords().add(record);
+        System.out.println("updatowane");
         recordService.save(record);
         sessionService.save(session);
         return record;

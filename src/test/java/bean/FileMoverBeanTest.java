@@ -1,22 +1,27 @@
 package bean;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.regex.Matcher;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FileMoverBeanTest {
     final String FILE_NAME = "fileName.txt";
 
     private File one,two;
 
-    @Before
+    @BeforeEach
     public void before() throws IOException {
         one = new File(new File(new File("").getAbsolutePath()),FILE_NAME);
         two = new File(new File(new File("").getAbsolutePath()),"fileName" + " (" + 1 + ").txt");
@@ -38,7 +43,7 @@ public class FileMoverBeanTest {
         assertTrue(matcher.find());
     }
 
-    @After
+    @AfterEach
     public void removeAfter(){
         one.delete();
         two.delete();

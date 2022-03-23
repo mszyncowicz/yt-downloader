@@ -1,6 +1,7 @@
 package bean;
 
 import model.*;
+import model.Record;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import service.ConfigurationService;
@@ -45,6 +46,7 @@ public class FileMoverBean implements FileMoverBeanInterface {
 
         Optional<File> outputFile = (Optional<File>) download.getExecutor().getOutputFile();
         if (!outputFile.isPresent()) {
+            downloadedRecord.setState(State.failed);
             throw new IllegalArgumentException("File does not exist");
         }
 

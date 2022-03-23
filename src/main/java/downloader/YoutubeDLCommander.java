@@ -20,8 +20,7 @@ public class YoutubeDLCommander implements Commander {
     private static final String BEST_VIDEO = "-f \"bestvideo\" --recode-video mp4 --postprocessor-args \"-c:v nvenc" +
             " -rc constqp -qp 23 -preset llhq ?PA\" ";
     private static final String BEST_AUDIO = "--extract-audio --audio-format mp3 --audio-quality 0 --postprocessor-args \"?PA\" ";
-    private static final String BEST_AUDIOVIDEO = "-f \"best\" --recode-video mp4 --postprocessor-args \"-c:v nvenc" +
-            " -rc constqp -qp 23 -preset llhq ?PA\" ";
+    private static final String BEST_AUDIOVIDEO = " ";
     private boolean skipDownload;
     private boolean printJson;
     private boolean listFormats;
@@ -88,7 +87,7 @@ public class YoutubeDLCommander implements Commander {
     public String getCommand(Map<String, String> args) {
         Commander.super.argsCheck(args, required);
         StringBuffer buffer = new StringBuffer();
-        buffer.append("youtube-dl ");
+        buffer.append("yt-dlp ");
         postargs = "";
         String source = args.get(URL_PARAM);
         if (source == null) throw new IllegalArgumentException("No url in arguments");

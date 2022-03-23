@@ -1,11 +1,11 @@
 package service;
 
 import data.SessionRepository;
-import data.SessionRepositoryImpl;
 import model.Session;
-import model.SessionFactoryRule;
-import net.bytebuddy.pool.TypePool;
-import org.junit.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,24 +24,24 @@ public class SessionServiceTest {
 
     public static Map<String, Session> map = new HashMap<>();
 
-    @Before
+    @BeforeEach
     public void init(){
         sessionService = new SessionServiceImpl();
         SessionRepository mock = mock(SessionRepository.class);
         sessionService.setSessionRepository(mock);
         sessionService.init();
-        when(mock.getById(anyObject())).then(new Answer<Object>() {
+        when(mock.getById(any())).then(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                String argumentAt = invocationOnMock.getArgumentAt(0, String.class);
+                String argumentAt = invocationOnMock.getArgument(0, String.class);
                 return map.get(argumentAt);
             }
         });
 
-        when(mock.save(anyObject())).then(new Answer<Object>() {
+        when(mock.save(any())).then(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                Session argumentAt = invocationOnMock.getArgumentAt(0, Session.class);
+                Session argumentAt = invocationOnMock.getArgument(0, Session.class);
                 if (argumentAt == null){
                     throw new IllegalArgumentException();
                 }
@@ -51,7 +51,7 @@ public class SessionServiceTest {
         });
 
         when(mock.getByToken(anyString())).thenAnswer(invocation -> {
-            String argumentAt = invocation.getArgumentAt(0, String.class);
+            String argumentAt = invocation.getArgument(0, String.class);
             return map.get(argumentAt);
         });
     }
@@ -60,17 +60,17 @@ public class SessionServiceTest {
     public void createSession(){
         Session session = sessionService.createSession();
 
-        Assert.assertNotNull(session);
+        Assertions.assertNotNull(session);
 
-        Assert.assertNotNull(session.getId());
+        Assertions.assertNotNull(session.getId());
 
-        Assert.assertNotNull(session.getToken());
+        Assertions.assertNotNull(session.getToken());
 
-        Assert.assertFalse(session.getToken().isEmpty());
+        Assertions.assertFalse(session.getToken().isEmpty());
 
         Session sessionByToken = map.get(session.getToken());
 
-        Assert.assertTrue(session.equals(sessionByToken));
+        Assertions.assertTrue(session.equals(sessionByToken));
     }
 
     @Test
@@ -82,53 +82,52 @@ public class SessionServiceTest {
 
         Session sessionByToken = sessionService.getSessionByToken(session.getToken());
 
-        Assert.assertTrue(session.equals(sessionByToken));
+        Assertions.assertTrue(session.equals(sessionByToken));
 
     }
 
     @Test
-    @Ignore
-
+    @Disabled
     public void cacheOnTest(){
         Session session = sessionService.createSession();
 
-        Assert.assertTrue(map.containsKey(session.getToken()));
+        Assertions.assertTrue(map.containsKey(session.getToken()));
 
         Session sessionByToken = sessionService.getSessionByToken(session.getToken());
 
-        Assert.assertTrue(session.equals(sessionByToken));
+        Assertions.assertTrue(session.equals(sessionByToken));
 
         map.remove(session.getToken());
 
         sessionByToken = sessionService.getSessionByToken(session.getToken());
 
-        Assert.assertTrue(session.equals(sessionByToken));
+        Assertions.assertTrue(session.equals(sessionByToken));
 
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void cacheShouldKeepOnly1000(){
         Session session = sessionService.createSession();
 
-        Assert.assertTrue(map.containsKey(session.getToken()));
+        Assertions.assertTrue(map.containsKey(session.getToken()));
 
         Session sessionByToken = sessionService.getSessionByToken(session.getToken());
 
-        Assert.assertTrue(session.equals(sessionByToken));
+        Assertions.assertTrue(session.equals(sessionByToken));
 
         map.remove(session.getToken());
 
         sessionByToken = sessionService.getSessionByToken(session.getToken());
 
-        Assert.assertTrue(session.equals(sessionByToken));
+        Assertions.assertTrue(session.equals(sessionByToken));
 
         for (int i = 0; i< 1200; i++){
             Session sessionPop = sessionService.createSession();
             sessionByToken = sessionService.getSessionByToken(sessionPop.getToken());
         }
         sessionByToken = sessionService.getSessionByToken(session.getToken());
-        Assert.assertNull(sessionByToken);
+        Assertions.assertNull(sessionByToken);
     }
 
 

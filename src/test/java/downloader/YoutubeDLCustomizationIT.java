@@ -2,9 +2,10 @@ package downloader;
 
 import api.FileLocator;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.swing.text.html.Option;
 import java.io.File;
@@ -13,43 +14,45 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Slf4j
 public class YoutubeDLCustomizationIT {
     File file = null;
 
-    @Test(expected = WrongParametersException.class)
+    @Test
     public void exTest( ) throws WrongParametersException {
-        YoutubeDLCommander customization = YoutubeDLCommander.getBestAudio();
-        Map<String,String > args = new HashMap<>();
-        System.out.println(customization.getCommand(args));
+        Assertions.assertThrows(WrongParametersException.class, () -> {
+            YoutubeDLCommander customization = YoutubeDLCommander.getBestAudio();
+            Map<String, String> args = new HashMap<>();
+            System.out.println(customization.getCommand(args));
+        });
     }
 
     @Test
     public void basicTest() throws WrongParametersException {
         YoutubeDLCommander customization = YoutubeDLCommander.getBestAudioVideo();
         Map<String,String > args = new HashMap<>();
-        args.put("url","https://www.youtube.com/watch?v=YO8c7CjmS_E");
+        args.put("url","https://www.youtube.com/watch?v=jn3Eu_Fvw6E");
         String value = UUID.randomUUID().toString();
         args.put("uuid", value);
         String command = customization.getCommand(args);
 
-        Assert.assertTrue(command.contains(args.get("url")));
-        Assert.assertTrue(command.split(" ").length >= 5);
+        Assertions.assertTrue(command.contains(args.get("url")));
+        Assertions.assertTrue(command.split(" ").length >= 2);
 
         MediaToolExecutor executor = MediaToolExecutor.createExecutor(customization,args);
         Object object = executor.execute(customization,args);
 
-        Assert.assertTrue(executor.isDone());
+        Assertions.assertTrue(executor.isDone());
         if (executor.isError()){
             file = new File(value);
             file = file.listFiles()[0];
         }
-        Assert.assertFalse(executor.isError());
-        Assert.assertNotNull(object);
+        Assertions.assertFalse(executor.isError());
+        Assertions.assertNotNull(object);
         log.info(object.toString());
-        Assert.assertTrue(object instanceof Optional);
+        Assertions.assertTrue(object instanceof Optional);
 
         Optional<File> optional = (Optional<File>) object;
         if (optional.isPresent()){
@@ -58,13 +61,13 @@ public class YoutubeDLCustomizationIT {
             file = new File(value);
             fail();
         }
-        Assert.assertTrue(file.exists());
+        Assertions.assertTrue(file.exists());
         log.info(file.getParent());
 
 
     }
 
-    @After
+    @AfterEach
     public void after(){
         if (file != null){
             File parent = new File(file.getParent());
@@ -75,7 +78,7 @@ public class YoutubeDLCustomizationIT {
                 if (file1.exists()) file1.delete();
             }
             parent.delete();
-            Assert.assertFalse(parent.exists());
+            Assertions.assertFalse(parent.exists());
         }
     }
 }
