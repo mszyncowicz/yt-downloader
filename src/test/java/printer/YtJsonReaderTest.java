@@ -1,9 +1,9 @@
 package printer;
 
 import dto.YtMediaDetails;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class YtJsonReaderTest {
 
@@ -11,7 +11,7 @@ public class YtJsonReaderTest {
 
     YtMediaDetails result;
 
-    @Before
+    @BeforeEach
     public void init(){
         YtJsonReader ytJsonReader = new YtJsonReader();
         result = ytJsonReader.getDataFrom(RESULT_JSON);
@@ -19,26 +19,26 @@ public class YtJsonReaderTest {
 
     @Test
     public void duration(){
-        Assert.assertNotNull(result.getLength());
-        Assert.assertEquals("197",result.getLength());
+        Assertions.assertNotNull(result.getLength());
+        Assertions.assertEquals("197",result.getLength());
     }
 
     @Test
     public void thumbnail(){
-        Assert.assertNotNull(result.getThumbnail());
-        Assert.assertEquals("https://i.ytimg.com/vi/YO8c7CjmS_E/maxresdefault.jpg",result.getThumbnail());
+        Assertions.assertNotNull(result.getThumbnail());
+        Assertions.assertEquals("https://i.ytimg.com/vi/YO8c7CjmS_E/maxresdefault.jpg",result.getThumbnail());
     }
 
     @Test
     public void title(){
-        Assert.assertNotNull(result.getTitle());
+        Assertions.assertNotNull(result.getTitle());
         String expected = "RAYNA - ZLE TE CHUVAM / Райна - Зле те чувам, 2018";
-        Assert.assertEquals(expected,result.getTitle());
+        Assertions.assertEquals(expected,result.getTitle());
     }
 
     @Test
     public void author(){
-        Assert.assertNotNull(result.getAuthor());
-        Assert.assertEquals("PlanetaOfficial",result.getAuthor());
+        Assertions.assertNotNull(result.getAuthor());
+        Assertions.assertEquals("PlanetaOfficial",result.getAuthor());
     }
 }

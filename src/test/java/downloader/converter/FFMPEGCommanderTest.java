@@ -2,14 +2,13 @@ package downloader.converter;
 
 import api.Commander;
 import downloader.MediaToolExecutor;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 
 public class FFMPEGCommanderTest {
 

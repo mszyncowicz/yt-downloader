@@ -2,16 +2,14 @@ package downloader;
 
 import lombok.extern.slf4j.Slf4j;
 import model.Session;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.Assert.*;
 
 @Slf4j
 public class DefaultFileLocatorTest {
@@ -36,13 +34,13 @@ public class DefaultFileLocatorTest {
     public void shouldReturnNull(){
         String string = "NotFound";
         Optional<File> locate = findFromString(string,System.getProperty("user.dir"));
-        Assert.assertFalse(locate.isPresent());
+        Assertions.assertFalse(locate.isPresent());
     }
     @Test
     public void shouldFindPomXml(){
         String string = "pom.xml";
         Optional<File> locate = findFromString("file" + string,System.getProperty("user.dir"));
-        Assert.assertTrue(locate.isPresent());
+        Assertions.assertTrue(locate.isPresent());
     }
     @Test
     public void shouldFindInDirectory(){
@@ -56,12 +54,12 @@ public class DefaultFileLocatorTest {
         try{
             file.createNewFile();
         }catch (IOException ex){
-            Assert.fail();
+            Assertions.fail();
         }
 
         Optional<File> fromString = findFromString("file://" + fileName, directory);
 
-        Assert.assertTrue(fromString.isPresent());
+        Assertions.assertTrue(fromString.isPresent());
     }
 
     @Test
@@ -77,22 +75,22 @@ public class DefaultFileLocatorTest {
             file.createNewFile();
         }catch (IOException ex){
             ex.printStackTrace();
-            Assert.fail();
+            Assertions.fail();
         }
 
         Optional<File> fromString = findFromString("file://" +fileName, directory);
 
-        Assert.assertTrue(fromString.isPresent());
+        Assertions.assertTrue(fromString.isPresent());
     }
 
-    @After
+    @AfterEach
     public void removeDirs(){
         for (File file : dirsToRemove){
             for (File child : file.listFiles()){
                 child.delete();
             }
             file.delete();
-            Assert.assertFalse(file.exists());
+            Assertions.assertFalse(file.exists());
         }
     }
 }

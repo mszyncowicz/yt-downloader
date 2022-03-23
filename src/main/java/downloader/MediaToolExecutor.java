@@ -1,21 +1,21 @@
 package downloader;
 
-import api.Commander;
-import api.Executor;
-import api.Locator;
+import api.*;
 
 import api.Observable;
+import api.Observer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.File;
-import api.Observer;
+
 import org.opensaml.xmlsec.signature.P;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Slf4j
@@ -27,12 +27,12 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
     private List<Observer> observers;
 
     @Getter
-    private Object outputFile;
+    private Optional<File> outputFile;
     private boolean isError = false;
 
     @Getter
     @Setter
-    Locator fileLocator = DefaultFileLocator.defaultFileLocator;
+    FileLocator fileLocator = DefaultFileLocator.defaultFileLocator;
 
     @Getter
     @Setter
@@ -45,6 +45,7 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
     @Getter
     private String errorMessage;
 
+    private StringBuffer errorMessageBuffer;
 
     private MediaToolExecutor(){
 
@@ -74,9 +75,7 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
 
     @Override
     public void removeObserver(Observer observer) {
-        if (observers.contains(observer)){
-            observers.remove(observer);
-        }
+        observers.remove(observer);
     }
 
     @Override
@@ -86,7 +85,7 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
 
     @Override
     public Object execute(Commander commander, Map<String, String> args) throws WrongParametersException {
-        StringBuffer errorMessageBuffer = new StringBuffer();
+        errorMessageBuffer = new StringBuffer();
         outputFile = null;
         try {
             String line;
@@ -98,32 +97,23 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
 
             p = pb.start();
             log.info(processName + ": Starting new process " + commander.getCommand(args));
-            BufferedReader bri = new BufferedReader
-                    (new InputStreamReader(p.getInputStream()));
+            BufferedReader bri = p.inputReader();
 
-            BufferedReader bre = new BufferedReader
-                    (new InputStreamReader(p.getErrorStream()));
+            BufferedReader bre = p.errorReader();
 
             if (SHOW_LOGS){
                 showLogs(bri);
             }
+
+
+            p.waitFor();
+            p.destroy();
             boolean lvIsError = false;
-            while ((line = bre.readLine()) != null) {
-                if (line.toUpperCase().contains("ERROR")){
-                    log.error(line);
-                    lvIsError = true;
-                }
-                errorMessageBuffer.append(line);
-            }
+            lvIsError = isLvIsError(bre, lvIsError);
             bre.close();
             if (lvIsError){
                 isError = true;
             }
-
-            p.waitFor();
-            p.destroy();
-            pb = null;
-
             String output = args.get("output");
             if (!isError && output != null){
                 outputFile =  Optional.ofNullable(new File(uuid + "/" + output));
@@ -133,6 +123,11 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
             }
             else outputFile = null;
             bri.close();
+
+            if (outputFile.isPresent() && outputFile.get().getName().toLowerCase().endsWith("webm"))
+            {
+                convertToMp4(outputFile.get(),uuid);
+            }
 
             log.info(processName + ": Process finished successfully");
         }
@@ -148,6 +143,58 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
         }
     }
 
+    private boolean isLvIsError(BufferedReader bre, boolean isError) throws IOException {
+        String line;
+        while ((line = bre.readLine()) != null) {
+            if (line.toUpperCase().contains("ERROR")) {
+                log.error(line);
+                isError = true;
+            }
+            errorMessageBuffer.append(line);
+        }
+        return isError;
+    }
+
+    private void convertToMp4(File file, String uuid) throws Exception {
+        String mp4Name = file.getName().replace(".webm",".mp4");
+        Map<String,String> localArgs = new HashMap<>();
+        localArgs.put(FFMPEGCommander.INPUT_PARAM, file.getName());
+        localArgs.put(FFMPEGCommander.OUTPUT_PARAM, mp4Name);
+        FFMPEGCommander ffmpegCommander = new FFMPEGCommander();
+        ProcessBuilder pb = new ProcessBuilder(ffmpegCommander.getCommand(localArgs).split(FFMPEGCommander.SPLIT));
+        Process p = null;
+        setDirectory(pb, uuid);
+        p = pb.start();
+        BufferedReader bri = new BufferedReader
+                (new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
+
+        BufferedReader bre = new BufferedReader
+                (new InputStreamReader(p.getErrorStream()));
+
+        if (SHOW_LOGS){
+            new Thread(() ->{
+                showLogs(bri);
+            }).start();
+            new Thread(() ->{
+                showLogs(bre);
+            }).start();
+        }
+
+        p.waitFor();
+        p.destroy();
+        boolean lvIsError = false;
+        String line = null;
+        lvIsError = isLvIsError(bre, lvIsError);
+        bre.close();
+        bri.close();
+        if (lvIsError){
+            isError = true;
+        }
+        if (!isError) {
+            outputFile = Optional.of(new File(uuid + "/" + mp4Name));
+        }
+    }
+
     private void showLogs(BufferedReader bri){
         try{
         bri.mark(50000);
@@ -159,7 +206,7 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
         }
             bri.reset();
         } catch (Exception e){
-
+            e.printStackTrace();
         }
     }
 
@@ -172,7 +219,9 @@ public class MediaToolExecutor extends Thread implements Executor, Observable {
     private void setDirectory(ProcessBuilder pb, String directory){
         if (directory != null){
             File fileDir = new File(directory);
-            fileDir.mkdirs();
+            if (!fileDir.exists()) {
+                fileDir.mkdirs();
+            }
             pb.directory(fileDir);
         }
     }

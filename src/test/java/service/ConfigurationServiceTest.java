@@ -7,21 +7,22 @@ import model.Configuration;
 import java.io.File;
 import java.util.UUID;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@ExtendWith(MockitoExtension.class)
 public class ConfigurationServiceTest {
 
     @Mock
@@ -31,15 +32,15 @@ public class ConfigurationServiceTest {
 
     List<Configuration> configurationList;
 
-    @Before
+    @BeforeEach
     public void init(){
         configurationService = spy(ConfigurationServiceImpl.class);
         configurationService.setConfigurationRepository(configurationRepository);
 
         configurationList = new ArrayList<>();
 
-        when(configurationRepository.save(anyObject())).then(a -> {
-            Configuration argumentConfig = a.getArgumentAt(0,Configuration.class);
+        when(configurationRepository.save(any())).then(a -> {
+            Configuration argumentConfig = a.getArgument(0,Configuration.class);
             if (!configurationList.isEmpty()){
                 if (argumentConfig.getId().equals(configurationList.get(0).getId())){
                     configurationList.remove(configurationList.get(0));
@@ -80,15 +81,15 @@ public class ConfigurationServiceTest {
     @Test
     public void defaultAudioFolderTest(){
         File audioFolder = configurationService.getAudioFolder();
-        Assert.assertNotNull(audioFolder);
-        Assert.assertEquals(ConfigurationServiceImpl.DEFAULT_PATH,audioFolder.getAbsolutePath());
+        Assertions.assertNotNull(audioFolder);
+        Assertions.assertEquals(ConfigurationServiceImpl.DEFAULT_PATH,audioFolder.getAbsolutePath());
     }
 
     @Test
     public void defaultVideoFolderTest(){
         File videoFolder = configurationService.getVideoFolder();
-        Assert.assertNotNull(videoFolder);
-        Assert.assertEquals(ConfigurationServiceImpl.DEFAULT_PATH,videoFolder.getAbsolutePath());
+        Assertions.assertNotNull(videoFolder);
+        Assertions.assertEquals(ConfigurationServiceImpl.DEFAULT_PATH,videoFolder.getAbsolutePath());
     }
 
     @Test
@@ -99,11 +100,11 @@ public class ConfigurationServiceTest {
 
         configurationService.updateConfiguration(configurationDTO);
 
-        Assert.assertFalse(configurationList.isEmpty());
+        Assertions.assertFalse(configurationList.isEmpty());
         Configuration result = configurationList.get(0);
 
-        Assert.assertEquals(newFolder,result.getVideoFolder());
-        Assert.assertEquals(ConfigurationServiceImpl.DEFAULT_PATH,result.getAudioFolder());
+        Assertions.assertEquals(newFolder,result.getVideoFolder());
+        Assertions.assertEquals(ConfigurationServiceImpl.DEFAULT_PATH,result.getAudioFolder());
 
     }
 
@@ -115,11 +116,11 @@ public class ConfigurationServiceTest {
 
         configurationService.updateConfiguration(configurationDTO);
 
-        Assert.assertFalse(configurationList.isEmpty());
+        Assertions.assertFalse(configurationList.isEmpty());
         Configuration result = configurationList.get(0);
 
-        Assert.assertEquals(newFolder,result.getAudioFolder());
-        Assert.assertEquals(ConfigurationServiceImpl.DEFAULT_PATH,result.getVideoFolder());
+        Assertions.assertEquals(newFolder,result.getAudioFolder());
+        Assertions.assertEquals(ConfigurationServiceImpl.DEFAULT_PATH,result.getVideoFolder());
 
     }
 
@@ -133,13 +134,13 @@ public class ConfigurationServiceTest {
         configurationDTO.setVideoFolder(videoFolder);
         configurationService.updateConfiguration(configurationDTO);
 
-        Assert.assertEquals(1,configurationList.size());
+        Assertions.assertEquals(1,configurationList.size());
 
 
         Configuration result = configurationList.get(0);
 
-        Assert.assertEquals(audioFolder,result.getAudioFolder());
-        Assert.assertEquals(videoFolder,result.getVideoFolder());
+        Assertions.assertEquals(audioFolder,result.getAudioFolder());
+        Assertions.assertEquals(videoFolder,result.getVideoFolder());
         verify(configurationService).createNewConfig();
     }
 
@@ -147,7 +148,7 @@ public class ConfigurationServiceTest {
     public void updateTest(){
         prepareConfig();
 
-        Assert.assertEquals(1,configurationList.size());
+        Assertions.assertEquals(1,configurationList.size());
 
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
         String videoFolder = "newFolder";
@@ -157,12 +158,12 @@ public class ConfigurationServiceTest {
         configurationDTO.setVideoFolder(videoFolder);
         configurationService.updateConfiguration(configurationDTO);
 
-        Assert.assertEquals(1,configurationList.size());
+        Assertions.assertEquals(1,configurationList.size());
 
         Configuration result = configurationList.get(0);
 
-        Assert.assertEquals(audioFolder,result.getAudioFolder());
-        Assert.assertEquals(videoFolder,result.getVideoFolder());
+        Assertions.assertEquals(audioFolder,result.getAudioFolder());
+        Assertions.assertEquals(videoFolder,result.getVideoFolder());
 
         verify(configurationService,times(0)).createNewConfig();
 

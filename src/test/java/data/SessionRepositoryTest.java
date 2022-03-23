@@ -1,31 +1,30 @@
 package data;
 
+import annotation.InjectEntityMangaer;
 import model.*;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import service.SessionServiceImpl;
+import model.Record;
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.UUID;
 
-import static junit.framework.TestCase.fail;
-
+@ExtendWith({SessionFactoryExtension.class})
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SessionRepositoryTest {
 
-    @Rule
-    public SessionFactoryRule sessionFactoryRule = new SessionFactoryRule();
 
+
+    @InjectEntityMangaer
     public SessionRepositoryImpl sessionRepository;
 
+    @InjectEntityMangaer
     public RecordRepositoryImpl recordRepository;
 
-    @Before
+    @BeforeAll
     public void init() {
         sessionRepository = new SessionRepositoryImpl();
         recordRepository = new RecordRepositoryImpl();
-        sessionFactoryRule.injectManager(sessionRepository);
-        sessionFactoryRule.injectManager(recordRepository);
     }
     private Session generateSession(){
         Session session = new Session();
@@ -40,11 +39,11 @@ public class SessionRepositoryTest {
         Session save = sessionRepository.save(session);
         sessionRepository.getEntityManager().getTransaction().commit();
 
-        Assert.assertTrue(session.equals(save));
+        Assertions.assertTrue(session.equals(save));
 
         Session byId = sessionRepository.getById(session.getId());
-        Assert.assertNotNull(byId);
-        Assert.assertTrue(session.equals(byId));
+        Assertions.assertNotNull(byId);
+        Assertions.assertTrue(session.equals(byId));
     }
 
     @Test
@@ -56,12 +55,12 @@ public class SessionRepositoryTest {
         sessionRepository.getEntityManager().getTransaction().commit();
 
         Session byToken = sessionRepository.getByToken(session.getToken());
-        Assert.assertTrue(session.equals(byToken));
+        Assertions.assertTrue(session.equals(byToken));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void nullSave(){
-        sessionRepository.save(null);
+        Assertions.assertThrows(IllegalArgumentException.class, () ->  sessionRepository.save(null));
     }
 
     @Test
@@ -71,7 +70,7 @@ public class SessionRepositoryTest {
         Session save = sessionRepository.save(session);
         sessionRepository.getEntityManager().getTransaction().commit();
 
-        Assert.assertTrue(session.equals(save));
+        Assertions.assertTrue(session.equals(save));
 
         Record e = new Record();
         e.setId(UUID.randomUUID());
@@ -86,11 +85,11 @@ public class SessionRepositoryTest {
         sessionRepository.getEntityManager().getTransaction().begin();
         save = sessionRepository.save(save);
         sessionRepository.getEntityManager().getTransaction().commit();
-        Assert.assertFalse(save == null);
+        Assertions.assertFalse(save == null);
 
         Session byToken = sessionRepository.getByToken(session.getToken());
-        Assert.assertTrue(session.equals(byToken));
-        Assert.assertEquals(1, byToken.getRecords().size());
+        Assertions.assertTrue(session.equals(byToken));
+        Assertions.assertEquals(1, byToken.getRecords().size());
     }
 
 }

@@ -160,8 +160,6 @@ public class DownloadBean implements DownloadBeanInterface {
                     e.printStackTrace();
                 }
             }
-
-
         }
 
     }
@@ -197,10 +195,9 @@ public class DownloadBean implements DownloadBeanInterface {
 
                 try {
                     fileMoverBeanInterface.moveToConfigLocation(download);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     download.getRecord().setState(State.failed);
-                    recordService.save(download.getRecord());
                 }
                 removeFinished(download);
             }

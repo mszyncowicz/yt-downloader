@@ -4,20 +4,24 @@ import api.Observable;
 import api.Observer;
 import model.Record;
 import model.State;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class LogObserverTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class LogObserverIT {
 
     LogObserver observer;
 
     ObserverTest observerTest;
-    @Before
+    @BeforeEach
     public void init() throws FileNotFoundException {
         observerTest = new ObserverTest(new FileInputStream("ObserverTest.txt"));
         observer = new LogObserver(new Record());
@@ -27,30 +31,30 @@ public class LogObserverTest {
     @Test
     public void shouldPercentageChange(){
         observerTest.startWhole();
-        Assert.assertEquals(100f,observer.getPercentage().floatValue(), 0.0001);
+        Assertions.assertEquals(100f,observer.getPercentage().floatValue(), 0.0001);
     }
 
     @Test
     public void shouldChangeTitle(){
         observerTest.startWhole();
-        Assert.assertNotNull(observer.getTitle());
+        Assertions.assertNotNull(observer.getTitle());
     }
 
     @Test
     public void titleShouldNotContainWebmExt(){
         observerTest.startWhole();
         System.out.println(observer.getTitle());
-        Assert.assertFalse(observer.getTitle().toLowerCase().contains("\\.webm"));
+        Assertions.assertFalse(observer.getTitle().toLowerCase().contains("\\.webm"));
     }
     @Test
     public void titleShouldNotContainYtCode(){
         observerTest.startWhole();
-        Assert.assertFalse(observer.getTitle().contains("-ecc_G1W8VvU"));
+        Assertions.assertFalse(observer.getTitle().contains("-ecc_G1W8VvU"));
     }
     @Test
     public void shouldChangeRecordState(){
         observerTest.startWhole();
-        Assert.assertEquals(observer.getRecord().getState(),State.converting);
+        Assertions.assertEquals(observer.getRecord().getState(),State.converting);
     }
 
     static class ObserverTest implements Observable {

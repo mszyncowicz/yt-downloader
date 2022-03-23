@@ -17,7 +17,7 @@ public class LinkPrinterExecutor implements PrinterExecutor {
 
     public static LinkPrinterExecutor basicPrinterExecutor(){
         LinkPrinterExecutor executor = new LinkPrinterExecutor();
-        executor.mediaToolExecutor.setFileLocator(DefaultPrinterLocator.defaultPrinterLocator);
+        //executor.mediaToolExecutor.setFileLocator(DefaultPrinterLocator.defaultPrinterLocator);
         return executor;
     }
 

@@ -59,13 +59,13 @@ public class Main {
             throw new Error("You need " + app + " installed in environment variables to run this application");
         } finally {
             if (mediaToolExecutor.isError()){
-                log.error("P" + MediaToolExecutor.processId + ": " +mediaToolExecutor.getErrorMessage());
-            }
-        }
+        log.error("P" + MediaToolExecutor.processId + ": " +mediaToolExecutor.getErrorMessage());
+    }
+}
     }
 
-    //@PostConstruct
-    public void lookup() throws ClassNotFoundException, IOException, SQLException {
+//@PostConstruct
+public void lookup() throws ClassNotFoundException, IOException, SQLException {
         update();
         lookForApp("ffmpeg");
         Class.forName("org.h2.Driver");
@@ -86,6 +86,6 @@ public class Main {
 
     @Schedule(hour = "*/1",persistent = false)
     public void update(){
-        lookForApp("youtube-dl -U");
+        lookForApp("yt-dlp -U");
     }
 }

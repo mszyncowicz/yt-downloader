@@ -3,7 +3,6 @@ package downloader.converter;
 import api.Commander;
 import downloader.WrongParametersException;
 import lombok.Getter;
-import oracle.jrockit.jfr.StringConstantPool;
 
 import java.time.Instant;
 import java.time.LocalTime;

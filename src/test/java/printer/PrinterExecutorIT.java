@@ -3,8 +3,8 @@ package printer;
 import api.Commander;
 import downloader.WrongParametersException;
 import downloader.YoutubeDLCommander;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ public class PrinterExecutorIT {
     Commander commander;
 
     Map<String, String> args;
-    @Before
+    @BeforeEach
     public void init(){
         commander = new YoutubeDLPrinter();
         args = new HashMap<>();

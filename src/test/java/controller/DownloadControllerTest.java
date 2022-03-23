@@ -8,9 +8,10 @@ import dto.LogObserversDTO;
 import dto.YTParametersDTO;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import model.Record;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -21,7 +22,6 @@ import javax.transaction.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 @Slf4j
@@ -42,7 +42,7 @@ public class DownloadControllerTest {
 
     private  Set<Object> saved;
 
-    @Before
+    @BeforeEach
     public void init() {
         MockitoAnnotations.initMocks(this);
         saved = new HashSet<>();
@@ -68,7 +68,7 @@ public class DownloadControllerTest {
         } catch (AbstractMethodError error) {
             error.printStackTrace();
         }
-        Assert.assertTrue(saved.size() > 0);
+        Assertions.assertTrue(saved.size() > 0);
     }
 
     @Test
@@ -99,22 +99,22 @@ public class DownloadControllerTest {
         when(downloadInfoService.getStartedDownloads()).thenReturn(downloads);
 
         doAnswer(a -> {
-            Object argumentAt = a.getArgumentAt(0, Object.class);
+            Object argumentAt = a.getArgument(0, Object.class);
             boolean result = false;
             if (argumentAt instanceof LogObserversDTO){
                 LogObserversDTO logOberversDto = (LogObserversDTO) argumentAt;
-                Assert.assertEquals(1,logOberversDto.getLogObserversDTOList().size());
+                Assertions.assertEquals(1,logOberversDto.getLogObserversDTOList().size());
                 LogObserverDTO logObserverDTO = logOberversDto.getLogObserversDTOList().get(0);
-                Assert.assertEquals(last_message,logObserverDTO.getLastMessage());
-                Assert.assertEquals(record.getId().toString(),(logObserverDTO.getRecordUUID()));
-                Assert.assertEquals(record.getState().name(),logObserverDTO.getState());
-                Assert.assertEquals(0,Float.compare(percentage,logObserverDTO.getPercentage()));
-                Assert.assertFalse(logOberversDto.hasAnyErrors);
+                Assertions.assertEquals(last_message,logObserverDTO.getLastMessage());
+                Assertions.assertEquals(record.getId().toString(),(logObserverDTO.getRecordUUID()));
+                Assertions.assertEquals(record.getState().name(),logObserverDTO.getState());
+                Assertions.assertEquals(0,Float.compare(percentage,logObserverDTO.getPercentage()));
+                Assertions.assertFalse(logOberversDto.hasAnyErrors);
                 result = true;
             }
             atomicBoolean.set(result);
             return null;
-        }).when(downloadController).returnEntity(anyObject());
+        }).when(downloadController).returnEntity(any());
 
         downloadController.getCurrentDownloadInfo(token);
 
@@ -125,7 +125,7 @@ public class DownloadControllerTest {
         verify(downloadController,times(1)).sessionExist(anyString());
         verify(downloadInfoService).hasErrorForSession(token);
 
-        Assert.assertTrue(atomicBoolean.get());
+        Assertions.assertTrue(atomicBoolean.get());
 
     }
 
@@ -157,18 +157,18 @@ public class DownloadControllerTest {
         when(downloadInfoService.getStartedDownloads()).thenReturn(downloads);
 
         doAnswer(a -> {
-            Object argumentAt = a.getArgumentAt(0, Object.class);
+            Object argumentAt = a.getArgument(0, Object.class);
             boolean result = false;
             if (argumentAt instanceof LogObserver){
                 result = true;
             }
             atomicBoolean.set(result);
             return null;
-        }).when(downloadController).returnEntity(anyObject());
+        }).when(downloadController).returnEntity(any());
 
         atomicBoolean.set(false);
         downloadController.getLogObserver(token, id.toString());
-        Assert.assertTrue(atomicBoolean.get());
+        Assertions.assertTrue(atomicBoolean.get());
 
     }
 

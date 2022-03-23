@@ -1,15 +1,16 @@
 package service;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+
 import model.Record;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class QueueServiceTest {
 
     QueueServiceImpl queueService;
     Record record1,record2,record3;
-    @Before
+    @BeforeEach
     public void init(){
         queueService = new QueueServiceImpl();
         record1 = new Record();
@@ -23,7 +24,7 @@ public class QueueServiceTest {
 
     @Test
     public void testAdd(){
-        Assert.assertTrue(queueService.size() == 3);
+        Assertions.assertTrue(queueService.size() == 3);
     }
 
     @Test
@@ -32,9 +33,9 @@ public class QueueServiceTest {
         Record lvRecord3 = queueService.dequeue();
         Record lvRecord1 = queueService.dequeue();
 
-        Assert.assertTrue(lvRecord2.equals(record2));
-        Assert.assertTrue(lvRecord3.equals(record3));
-        Assert.assertTrue(lvRecord1.equals(record1));
+        Assertions.assertTrue(lvRecord2.equals(record2));
+        Assertions.assertTrue(lvRecord3.equals(record3));
+        Assertions.assertTrue(lvRecord1.equals(record1));
     }
 
 }

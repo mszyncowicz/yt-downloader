@@ -2,23 +2,26 @@ package controller;
 
 import dto.ConfigurationDTO;
 import model.Configuration;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import service.ConfigurationService;
 import service.SessionService;
 
 import javax.transaction.*;
 import java.io.File;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FileControllerTest {
 
     private static final String DEFAULT_VIDEO_FOLDER = "e://Downloads//";
@@ -39,7 +42,7 @@ public class FileControllerTest {
     @Mock
     UserTransaction userTransaction;
 
-    @Before
+    @BeforeEach
     public void init(){
         fileController = new FileController();
         fileController.setSessionService(sessionService);
@@ -52,7 +55,7 @@ public class FileControllerTest {
         when(configurationService.getAudioFolder()).thenReturn(new File(DEFAULT_AUDIO_FOLDER));
         when(configurationService.getVideoFolder()).thenReturn(new File(DEFAULT_VIDEO_FOLDER));
         when(configurationService.updateConfiguration(any())).then(a -> {
-            ConfigurationDTO argumentAt = a.getArgumentAt(0, ConfigurationDTO.class);
+            ConfigurationDTO argumentAt = a.getArgument(0, ConfigurationDTO.class);
             configurationDTO.setVideoFolder(argumentAt.getVideoFolder());
             configurationDTO.setAudioFolder(argumentAt.getAudioFolder());
             return true;
@@ -78,7 +81,7 @@ public class FileControllerTest {
     @Test
     public void shouldReturnDefaults(){
         ConfigurationDTO fromService = fileController.getFromService();
-        Assert.assertTrue(configurationDTO.equals(fromService));
+        Assertions.assertTrue(configurationDTO.equals(fromService));
 
         verify(configurationService,times(1)).getAudioFolder();
         verify(configurationService,times(1)).getVideoFolder();
@@ -97,7 +100,7 @@ public class FileControllerTest {
         }catch (AbstractMethodError e){
         }
 
-        Assert.assertTrue(newConfig.equals(configurationDTO));
+        Assertions.assertTrue(newConfig.equals(configurationDTO));
     }
 
     @Test
@@ -108,6 +111,6 @@ public class FileControllerTest {
         String videoFolder = "dgdgsgrgd";
         newConfig.setVideoFolder(videoFolder);
 
-        Assert.assertFalse(newConfig.equals(configurationDTO));
+        Assertions.assertFalse(newConfig.equals(configurationDTO));
     }
 }
